@@ -1,14 +1,18 @@
-// src/components/CustomerDashboard.jsx
-import { useState, useEffect } from 'react';
-import { Container, Typography, Button, Box, Paper, CircularProgress, Alert } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useContext } from 'react';
+import { Container, Typography, Button, Box, Paper, CircularProgress, Alert, Grid, Divider } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import HistoryIcon from '@mui/icons-material/History';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import RequestServiceModal from './RequestServiceModal'; // To be created
-import ServiceRequestList from './ServiceRequestList'; // To be created
+import AuthContext from '../context/AuthContext';
+import pusher from '../api/pusher';
 import { getCustomerRequests } from '../api/serviceApi';
 
+import RequestServiceModal from './RequestServiceModal';
+import ServiceRequestCard from './ServiceRequestCard';
+
 const CustomerDashboard = () => {
+    const { user } = useContext(AuthContext);
     const [modalOpen, setModalOpen] = useState(false);
     const [requests, setRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -22,50 +26,143 @@ const CustomerDashboard = () => {
             setRequests(response.data);
         } catch (err) {
             setError('Failed to fetch your requests. Please try again later.');
-            console.error(err);
         } finally {
             setIsLoading(false);
         }
     };
-
+    
+    // Initial fetch
     useEffect(() => {
         fetchRequests();
     }, []);
     
-    // This function will be passed to the modal to refresh the list after a new request
+    // Pusher real-time updates
+    useEffect(() => {
+        if (!user?.id) return;
+        const channelName = `private-user-${user.id}`;
+        const channel = pusher.subscribe(channelName);
+        
+        channel.bind('request-accepted', (data) => {
+            const updatedRequest = data.request;
+            setRequests(current => current.map(req => (req.id === updatedRequest.id ? updatedRequest : req)));
+        });
+
+        // Add binders for other real-time events here later, e.g., 'request-completed'
+        
+        return () => pusher.unsubscribe(channelName);
+    }, [user?.id]);
+    
     const handleRequestCreated = () => {
-        fetchRequests();
+        fetchRequests(); // Re-fetch all requests to include the new one
         setModalOpen(false);
-    }
+    };
+
+    // Filter requests into active and past jobs
+    const activeJobs = requests.filter(req => ['PENDING', 'ACCEPTED', 'IN_PROGRESS'].includes(req.status));
+    const pastJobs = requests.filter(req => ['COMPLETED', 'CANCELLED'].includes(req.status));
+
+    // --- RENDER LOGIC ---
+
+    const renderContent = () => {
+        if (isLoading) {
+            return <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}><CircularProgress /></Box>;
+        }
+        if (error) {
+            return <Alert severity="error">{error}</Alert>;
+        }
+        return (
+            <Grid container spacing={4}>
+                {/* Active Jobs Section */}
+                <Grid item xs={12}>
+                    <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+                        Active Jobs ({activeJobs.length})
+                    </Typography>
+                    {activeJobs.length > 0 ? (
+                        <Grid container spacing={3}>
+                            <AnimatePresence>
+                            {activeJobs.map((request) => (
+                                <Grid item xs={12} sm={6} md={4} key={request.id}>
+                                    <ServiceRequestCard request={request} />
+                                </Grid>
+                            ))}
+                            </AnimatePresence>
+                        </Grid>
+                    ) : (
+                        <Typography color="text.secondary">You have no active job requests.</Typography>
+                    )}
+                </Grid>
+
+                {/* Past Jobs Section */}
+                <Grid item xs={12}>
+                    <Divider sx={{ my: 4 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                        <HistoryIcon color="action" />
+                        <Typography variant="h5" component="h2" fontWeight="bold">
+                            Job History
+                        </Typography>
+                    </Box>
+                    {pastJobs.length > 0 ? (
+                         <Grid container spacing={3}>
+                            {pastJobs.map((request) => (
+                                <Grid item xs={12} sm={6} md={4} key={request.id}>
+                                    <ServiceRequestCard request={request} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    ) : (
+                        <Typography color="text.secondary">Your past jobs will appear here.</Typography>
+                    )}
+                </Grid>
+            </Grid>
+        );
+    };
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                <Paper sx={{ p: 3, mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                        <Typography variant="h5" component="h1" fontWeight="bold">My Service Requests</Typography>
-                        <Typography color="text.secondary">View and manage all your service requests here.</Typography>
-                    </Box>
-                    <Button 
-                        variant="contained" 
-                        startIcon={<AddCircleOutlineIcon />}
-                        onClick={() => setModalOpen(true)}
-                        sx={{ py: 1.5 }}
-                    >
-                        Request New Service
-                    </Button>
-                </Paper>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            {/* Header / Call to Action */}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: { xs: 2, sm: 4 },
+                    mb: 4,
+                    bgcolor: 'primary.dark',
+                    color: 'white',
+                    borderRadius: 4,
+                }}
+            >
+                <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs={12} md={8}>
+                        <Typography variant="h4" component="h1" fontWeight="bold">
+                            Welcome back, {user?.first_name}!
+                        </Typography>
+                        <Typography sx={{ mt: 1, opacity: 0.8 }}>
+                            Ready to get things done? Request a service and get help in minutes.
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={4} sx={{ textAlign: { md: 'right' } }}>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                             <Button
+                                variant="contained"
+                                color="secondary"
+                                size="large"
+                                startIcon={<AddCircleIcon />}
+                                onClick={() => setModalOpen(true)}
+                            >
+                                Request a Service
+                            </Button>
+                        </motion.div>
+                    </Grid>
+                </Grid>
+            </Paper>
+            
+            {/* Main Content */}
+            {renderContent()}
 
-                {isLoading && <Box sx={{display: 'flex', justifyContent: 'center', my: 5}}><CircularProgress /></Box>}
-                {error && <Alert severity="error">{error}</Alert>}
-                {!isLoading && !error && <ServiceRequestList requests={requests} />}
-                
-                <RequestServiceModal 
-                    open={modalOpen} 
-                    handleClose={() => setModalOpen(false)} 
-                    onSuccess={handleRequestCreated}
-                />
-            </motion.div>
+            <RequestServiceModal
+                open={modalOpen}
+                handleClose={() => setModalOpen(false)}
+                onSuccess={handleRequestCreated}
+            />
         </Container>
     );
 };

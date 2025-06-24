@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from .views import RegisterView, ProfileView, LogoutView
+from .views import RegisterView, ProfileView, LogoutView, ProviderServicesView
 
 # These URLs will be prefixed with /api/v1/auth/
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns = [
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view(), name='auth_logout'),
     path('profile/', ProfileView.as_view(), name='user_profile'),
+    path('provider/services/', ProviderServicesView.as_view(), name='provider-services'),
 ]

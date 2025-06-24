@@ -1,7 +1,9 @@
 # backend/services/serializers.py
 from rest_framework import serializers
 from .models import Service, ServiceCategory, ServiceRequest
-from users.serializers import UserSerializer 
+
+from common.serializers import UserSerializer 
+
 
 from django.contrib.auth import get_user_model
 from rest_framework.fields import CurrentUserDefault

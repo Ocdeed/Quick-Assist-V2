@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
+from services.models import Service
 from django.dispatch import receiver
 
 # --- 1. The Custom User Manager ---
@@ -72,6 +73,8 @@ class ProviderProfile(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     average_rating = models.FloatField(default=0.0)
     rating_count = models.IntegerField(default=0)
+    services_offered = models.ManyToManyField(Service, related_name='providers', blank=True)
+
 
     def __str__(self):
         return f"Provider details for {self.profile.user.email}"

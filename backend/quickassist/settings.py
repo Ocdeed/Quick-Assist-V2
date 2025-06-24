@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'communications',
     'reviews',
     'tracking',
+    'common', 
 ]
 
 MIDDLEWARE = [

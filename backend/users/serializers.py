@@ -1,6 +1,9 @@
 # backend/users/serializers.py
 from rest_framework import serializers
 from .models import User, Profile, ProviderProfile
+from common.serializers import UserSerializer 
+
+from common.serializers import UserSerializer
 
 # --- Read-Only Serializers (For GET requests) ---
 
@@ -65,3 +68,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             ProviderProfile.objects.create(profile=profile)
             
         return user
+    
+class ProviderServiceManagementSerializer(serializers.Serializer):
+    # This serializer is for adding/removing services. It just needs the service ID.
+    service_id = serializers.IntegerField()

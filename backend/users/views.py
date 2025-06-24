@@ -2,6 +2,12 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.exceptions import PermissionDenied
+
+from rest_framework.views import APIView
+from services.models import Service
+from .permissions import IsProvider
+from services.serializers import ServiceSerializer
 
 from .serializers import UserRegisterSerializer, UserSerializer
 
@@ -70,3 +76,51 @@ class LogoutView(generics.GenericAPIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+class ProviderServicesView(APIView):
+    """
+    GET: Returns a list of services the provider currently offers.
+    POST: Adds a service to the provider's offered list.
+    DELETE: Removes a service from the provider's offered list.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsProvider]
+    
+    def check_verification(self, request):
+        """Helper method to check for verification."""
+        if not request.user.profile.provider_profile.is_verified:
+            raise PermissionDenied("Your account is not yet verified by an administrator. Service management is disabled.")
+
+    def get(self, request, *args, **kwargs):
+        """Returns the list of services currently offered by the provider."""
+        provider_profile = request.user.profile.provider_profile
+        services = provider_profile.services_offered.all()
+        serializer = ServiceSerializer(services, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        """Adds a service to the provider's list."""
+        service_id = request.data.get('service_id')
+        if not service_id:
+            return Response({'error': 'Service ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            service_to_add = Service.objects.get(pk=service_id)
+            provider_profile = request.user.profile.provider_profile
+            provider_profile.services_offered.add(service_to_add)
+            return Response({'status': 'Service added successfully.'}, status=status.HTTP_200_OK)
+        except Service.DoesNotExist:
+            return Response({'error': 'Service not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        """Removes a service from the provider's list."""
+        service_id = request.data.get('service_id')
+        if not service_id:
+            return Response({'error': 'Service ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            service_to_remove = Service.objects.get(pk=service_id)
+            provider_profile = request.user.profile.provider_profile
+            provider_profile.services_offered.remove(service_to_remove)
+            return Response({'status': 'Service removed successfully.'}, status=status.HTTP_200_OK)
+        except Service.DoesNotExist:
+            return Response({'error': 'Service not found.'}, status=status.HTTP_404_NOT_FOUND)

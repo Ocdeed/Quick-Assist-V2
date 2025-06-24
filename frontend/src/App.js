@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import { AuthProvider } from './context/AuthContext';
 import AuthContext from './context/AuthContext';
-import theme from './theme'; // Import our custom theme
+import theme from './theme'; // Our custom theme from Phase 1
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -21,9 +21,24 @@ function App() {
             <Router>
                 <AuthProvider>
                     <Routes>
+                        {/* If logged in, redirect from auth pages to dashboard */}
                         <Route path="/login" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
                         <Route path="/register" element={<AuthRedirect><RegisterPage /></AuthRedirect>} />
-                        <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+                        
+                        {/* Protected route for the main dashboard */}
+                        <Route 
+                            path="/dashboard" 
+                            element={
+                                <PrivateRoute>
+                                    <DashboardPage />
+                                </PrivateRoute>
+                            } 
+                        />
+                        
+                        {/* Default route that redirects users */}
+                        {/* For unauthenticated users, this will first hit PrivateRoute,
+                            then redirect to /login. For authenticated users, it will
+                            show the dashboard. */}
                         <Route path="/" element={<Navigate to="/dashboard" />} />
                     </Routes>
                 </AuthProvider>
@@ -32,9 +47,10 @@ function App() {
     );
 }
 
-// Helper to prevent logged-in users from seeing auth pages
+// Helper component to prevent logged-in users from revisiting login/register pages
 const AuthRedirect = ({children}) => {
     const { user } = useContext(AuthContext);
+    // If the user object exists, they are logged in, so redirect them.
     return user ? <Navigate to="/dashboard" /> : children;
 }
 

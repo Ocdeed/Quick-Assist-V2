@@ -179,3 +179,51 @@ class ServiceRequestDetailView(generics.RetrieveAPIView):
     queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestListSerializer # Our detailed "list" serializer works perfectly here
     permission_classes = [permissions.IsAuthenticated, IsPartyToRequest]
+    
+class ServiceRequestStatusUpdateView(APIView):
+    """
+    POST /api/v1/services/requests/{pk}/update_status/
+    Allows a provider or customer to update the status of a job.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsPartyToRequest]
+    
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            service_request = ServiceRequest.objects.get(pk=pk)
+            # Make sure we have the object before checking permissions
+            self.check_object_permissions(request, service_request)
+        except ServiceRequest.DoesNotExist:
+            return Response({"error": "Service request not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        new_status = request.data.get('status')
+        user = request.user
+        
+        # --- Define the state transition rules ---
+        allowed_transitions = {
+            'PROVIDER': {
+                'ACCEPTED': ['IN_PROGRESS'],
+                'IN_PROGRESS': ['COMPLETED'],
+            },
+            'CUSTOMER': {
+                'PENDING': ['CANCELLED'],
+                'ACCEPTED': ['CANCELLED'],
+            }
+        }
+        
+        current_status = service_request.status
+        role = user.role
+        
+        if role in allowed_transitions and current_status in allowed_transitions[role]:
+            if new_status in allowed_transitions[role][current_status]:
+                service_request.status = new_status
+                service_request.save()
+                
+                # --- Trigger Pusher Event for status update ---
+                channel_name = f'private-request-{pk}'
+                event_name = 'status-update'
+                payload = {'status': new_status}
+                pusher_client.trigger(channel_name, event_name, payload)
+                
+                return Response(ServiceRequestListSerializer(service_request).data)
+        
+        return Response({'error': f"Invalid status transition from {current_status} to {new_status} for your role."}, status=status.HTTP_400_BAD_REQUEST)

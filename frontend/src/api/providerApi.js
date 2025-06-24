@@ -14,3 +14,11 @@ export const addServiceToMyProfile = (serviceId) => {
 export const removeServiceFromMyProfile = (serviceId) => {
     return api.delete('/auth/provider/services/', { data: { service_id: serviceId } });
 };
+
+export const updateJobStatus = (jobId, status) => {
+    return api.post(`/services/requests/${jobId}/update_status/`, { status });
+};
+// Also add a decline endpoint if you want one separate from the state machine
+export const declineJob = (jobId) => {
+     return api.post(`/services/requests/${jobId}/update_status/`, { status: 'DECLINED' });
+}

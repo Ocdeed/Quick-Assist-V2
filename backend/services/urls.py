@@ -2,7 +2,7 @@
 from django.urls import path
 from .views import (
     ServiceCategoryListView, ServiceRequestView, ServiceRequestDetailView, 
-    AvailableRequestListView, AcceptServiceRequestView
+    AvailableRequestListView, AcceptServiceRequestView, ServiceRequestStatusUpdateView
 )
 
 urlpatterns = [
@@ -15,4 +15,5 @@ urlpatterns = [
     # Provider endpoints
     path('requests/<int:pk>/accept/', AcceptServiceRequestView.as_view(), name='service-request-accept'),
     path('matching/available-requests/', AvailableRequestListView.as_view(), name='available-requests-list'),
+    path('requests/<int:pk>/update_status/', ServiceRequestStatusUpdateView.as_view(), name='service-request-update-status'), 
 ]

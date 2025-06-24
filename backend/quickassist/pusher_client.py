@@ -1,6 +1,6 @@
 # backend/quickassist/pusher_client.py
 import os
-import pusher
+import pusher # type: ignore
 
 pusher_client = pusher.Pusher(
     app_id=os.getenv('PUSHER_APP_ID'),

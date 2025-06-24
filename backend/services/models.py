@@ -25,6 +25,7 @@ class ServiceRequest(models.Model):
     class ServiceRequestStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending'
         ACCEPTED = 'ACCEPTED', 'Accepted'
+        DECLINED = 'DECLINED', 'Declined' 
         IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
         COMPLETED = 'COMPLETED', 'Completed'
         CANCELLED = 'CANCELLED', 'Cancelled'

@@ -1,6 +1,7 @@
 # backend/services/views.py
 from rest_framework import generics, permissions, status
-from users.permissions import IsCustomer, IsProvider
+from rest_framework.exceptions import PermissionDenied
+from users.permissions import IsCustomer, IsProvider, IsPartyToRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db import transaction
@@ -8,9 +9,10 @@ from django.utils import timezone
 from datetime import timedelta
 from geopy.distance import geodesic # type: ignore
 import math
+from quickassist.pusher_client import pusher_client 
 
 from .models import ServiceCategory, ServiceRequest
-from users.models import ProviderProfile
+from users.models import ProviderProfile, User
 
 
 from .serializers import (
@@ -32,27 +34,39 @@ class ServiceCategoryListView(generics.ListAPIView):
 # --- Service Request Endpoints (For Customers) ---
 class ServiceRequestView(generics.ListCreateAPIView):
     """
-    GET /api/v1/services/requests/
-        - Lists all requests made by the currently authenticated CUSTOMER.
-    POST /api/v1/services/requests/
-        - Creates a new service request for the currently authenticated CUSTOMER.
+    Handles service requests.
+    - CUSTOMER: GET -> lists their own requests. POST -> creates a new request.
+    - PROVIDER: GET -> lists jobs they have accepted. POST -> is forbidden.
     """
-    permission_classes = [permissions.IsAuthenticated, IsCustomer] 
+    # Note: We now allow IsProvider for the GET method.
+    permission_classes = [permissions.IsAuthenticated] 
 
     def get_queryset(self):
-        # Users can only see their own requests
-        return ServiceRequest.objects.filter(customer=self.request.user).order_by('-created_at')
+        """
+        This method now returns a different queryset based on the user's role.
+        """
+        user = self.request.user
+        if user.role == User.Role.CUSTOMER:
+            # Customers see the requests they created.
+            return ServiceRequest.objects.filter(customer=user).order_by('-created_at')
+        elif user.role == User.Role.PROVIDER:
+            # Providers see the requests they have accepted.
+            return ServiceRequest.objects.filter(provider=user).order_by('-updated_at')
+        
+        # If user is an Admin or has no role, return an empty list.
+        return ServiceRequest.objects.none()
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return ServiceRequestCreateSerializer
+        # The list serializer works for both customer and provider views.
         return ServiceRequestListSerializer
-    
+
     def perform_create(self, serializer):
-        """
-        This hook is called by CreateModelMixin when saving a new object instance.
-        We use it to set the customer to the currently authenticated user.
-        """
+        # We need to ensure only customers can use this.
+        # Adding a check here in addition to the frontend logic is good practice.
+        if self.request.user.role != User.Role.CUSTOMER:
+            raise PermissionDenied("Only customers can create service requests.")
         serializer.save(customer=self.request.user)
 
 # --- Provider-Specific Endpoints ---
@@ -142,8 +156,26 @@ class AcceptServiceRequestView(APIView):
             service_request.provider = provider_user
             service_request.status = ServiceRequest.ServiceRequestStatus.ACCEPTED
             service_request.save()
+            
+            # Notify the customer that their request was accepted
+            channel_name = f'private-user-{service_request.customer.id}' # A channel just for this user
+            event_name = 'request-accepted'
+            
+            # Send the full request details in the payload
+            payload = ServiceRequestListSerializer(service_request).data
+            pusher_client.trigger(channel_name, event_name, {'request': payload})
 
             # Logic to notify the customer would go here (e.g., via WebSocket)
 
             serializer = ServiceRequestListSerializer(service_request)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
+class ServiceRequestDetailView(generics.RetrieveAPIView):
+    """
+    GET /api/v1/services/requests/{pk}/
+    Retrieves the details of a single service request.
+    Only accessible by the customer who created it or the provider assigned to it.
+    """
+    queryset = ServiceRequest.objects.all()
+    serializer_class = ServiceRequestListSerializer # Our detailed "list" serializer works perfectly here
+    permission_classes = [permissions.IsAuthenticated, IsPartyToRequest]

@@ -10,7 +10,7 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
         fields = ('bio', 'is_verified', 'is_available', 'average_rating')
 
 class ProfileSerializer(serializers.ModelSerializer):
-    provider_profile = ProviderProfileSerializer(read_only=True)
+    provider_profile = ProviderProfileSerializer(required=False, allow_null=True)
     class Meta:
         model = Profile
         fields = ('phone_number', 'profile_picture_url', 'provider_profile')

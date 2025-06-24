@@ -45,3 +45,17 @@ export const updateProviderLocation = (locationData) => {
     console.log("Simulating provider location update:", locationData);
     return Promise.resolve(); // Simulate success
 }
+
+// This endpoint fetches details of a specific service request by its ID
+// This is useful for the job detail page where we need to show tracking info and chat
+// and other details about the job.
+export const getServiceRequestDetails = (requestId) => {
+    return api.get(`/services/requests/${requestId}/`);
+}
+
+export const getChatMessages = (requestId) => {
+    return api.get(`/communications/requests/${requestId}/chat/`);
+};
+export const sendChatMessage = (requestId, text) => {
+    return api.post(`/communications/requests/${requestId}/chat/`, { text });
+};

@@ -10,6 +10,7 @@ import theme from './theme'; // Our custom theme from Phase 1
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import JobDetailPage from './pages/JobDetailPage';
 
 // Components
 import PrivateRoute from './components/PrivateRoute';
@@ -34,6 +35,14 @@ function App() {
                                 </PrivateRoute>
                             } 
                         />
+
+                        {/* --- ADD THIS NEW ROUTE --- */}
+                        <Route path="/jobs/:id" element={
+                          <PrivateRoute>
+                            <JobDetailPage />
+                            </PrivateRoute>
+                          } 
+                          />
                         
                         {/* Default route that redirects users */}
                         {/* For unauthenticated users, this will first hit PrivateRoute,

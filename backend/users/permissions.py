@@ -15,3 +15,11 @@ class IsProvider(BasePermission):
     """
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.role == User.Role.PROVIDER)
+    
+class IsPartyToRequest(BasePermission):
+    """
+    Permission to only allow the customer or provider of a service request to access it.
+    """
+    def has_object_permission(self, request, view, obj):
+        # The 'obj' here is the ServiceRequest instance fetched from the database
+        return request.user == obj.customer or request.user == obj.provider

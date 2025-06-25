@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/ChatPanel.jsx
 // This code is very similar to our redesigned ChatBox, but structured as a complete panel.
 import { useState, useEffect, useRef, useContext } from 'react';

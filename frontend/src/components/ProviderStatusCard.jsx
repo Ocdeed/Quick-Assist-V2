@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/ProviderStatusCard.jsx
 import { Paper, Typography, Box, Switch, FormControlLabel, Alert, Button, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';

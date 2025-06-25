@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/JobCard.jsx
 import { Paper, Typography, Box, Button, Chip } from '@mui/material';
 import moment from 'moment';

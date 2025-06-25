@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/JobDetailsCard.jsx
 import { Paper, Typography, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Avatar, Chip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';

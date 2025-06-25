@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/JobStatusStepper.jsx
 import { Stepper, Step, StepLabel, StepIcon, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';

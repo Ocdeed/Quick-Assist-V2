@@ -144,7 +144,6 @@ Update the provider's public profile page to display their average rating and al
 Milestone at End of Phase 4:
 A customer can complete a job, initiate a simulated M-Pesa payment, and leave a review. The review and payment status are reflected correctly in the system.
 
- again ensure to be detailed as possible ensuring all the api endpoint that you create are working clearly and are roboust and well structured and  for now do the  backend part to be done in phase 4 and only after that its when we will proceed with the frontend of the phase 4. Remember you are and experienced developer and also avoid error
 
 Phase 5: Administration, Notifications & Final Polish (Weeks 13-14)
 
@@ -184,3 +183,5 @@ Milestone at End of Phase 5:
 The QUICKASSIST platform is feature-complete, robustly tested, and ready for your final year project demonstration. The admin can manage the platform, and all third-party services are fully integrated.
 
  again ensure to be detailed as possible ensuring all the api endpoint that you create are working clearly and are roboust and well structured and  for now do the  backend part to be done in phase one and only after that its when we will proceed with the frontend of the phase 1. Remember you are and experienced developer and also avoid error
+
+ Good work you have done so far but It has come to my realizationa that I have to amke some changes on how the provide work whar I need is the 

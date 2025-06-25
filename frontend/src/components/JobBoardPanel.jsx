@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Box, Typography, Paper, CircularProgress, Alert, Switch, FormControlLabel, Grid, Button, Divider, Chip, Tooltip } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';

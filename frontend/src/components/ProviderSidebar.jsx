@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/components/ProviderSidebar.jsx
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';

@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import JobDetailPage from './pages/JobDetailPage';
+import ProviderProfilePage from './pages/ProviderProfilePage';
 
 // Components
 import PrivateRoute from './components/PrivateRoute';
@@ -49,6 +50,7 @@ function App() {
                             then redirect to /login. For authenticated users, it will
                             show the dashboard. */}
                         <Route path="/" element={<Navigate to="/dashboard" />} />
+                        <Route path="/provider/:providerId/reviews" element={<PrivateRoute><ProviderProfilePage /></PrivateRoute>} />
                     </Routes>
                 </AuthProvider>
             </Router>

@@ -113,7 +113,7 @@ Build a live Chat component within the service request page that sends and recei
 Milestone at End of Phase 3:
 Once a job is accepted, the customer can see the provider's location moving on a map. Both customer and provider can communicate via a fully functional in-app chat.
 
-Phase 4: Closing the Loop - Payments & Reviews (Weeks 11-12)
+Okay now lets proceed to phase 4 of the development which is: Phase 4:  - Payments & Reviews (Weeks 11-12)
 
 Goal: Complete the full service cycle by implementing the payment and review systems.
 
@@ -143,6 +143,8 @@ Update the provider's public profile page to display their average rating and al
 
 Milestone at End of Phase 4:
 A customer can complete a job, initiate a simulated M-Pesa payment, and leave a review. The review and payment status are reflected correctly in the system.
+
+ again ensure to be detailed as possible ensuring all the api endpoint that you create are working clearly and are roboust and well structured and  for now do the  backend part to be done in phase 4 and only after that its when we will proceed with the frontend of the phase 4. Remember you are and experienced developer and also avoid error
 
 Phase 5: Administration, Notifications & Final Polish (Weeks 13-14)
 
@@ -181,4 +183,4 @@ Write comprehensive project documentation and a user manual.
 Milestone at End of Phase 5:
 The QUICKASSIST platform is feature-complete, robustly tested, and ready for your final year project demonstration. The admin can manage the platform, and all third-party services are fully integrated.
 
-again ensure to be detailed as possible ensuring all the api endpoint that you create are working clearly and are roboust and well structured and  for now do the  backend part to be done in phase one and only after that its when we will proceed with the frontend of the phase 1. Remember you are and experienced developer and also avoid error
+ again ensure to be detailed as possible ensuring all the api endpoint that you create are working clearly and are roboust and well structured and  for now do the  backend part to be done in phase one and only after that its when we will proceed with the frontend of the phase 1. Remember you are and experienced developer and also avoid error

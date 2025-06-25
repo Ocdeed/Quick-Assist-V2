@@ -64,3 +64,23 @@ export const getChatMessages = (requestId) => {
 export const sendChatMessage = (requestId, text) => {
     return api.post(`/communications/requests/${requestId}/chat/`, { text });
 };
+
+export const initiatePayment = (jobId, paymentData) => {
+    return api.post(`/services/requests/${jobId}/initiate_payment/`, paymentData);
+    // Note: We need to create this backend URL. Let's adjust payments/urls.py
+};
+
+// --- THIS IS THE NEW FUNCTION TO ADD ---
+/**
+ * Updates the status of a specific job.
+ * @param {number} jobId - The ID of the job to update.
+ * @param {string} status - The new status (e.g., 'IN_PROGRESS', 'COMPLETED').
+ * @returns {Promise} - The axios promise for the API call.
+ */
+export const updateJobStatus = (jobId, status) => {
+    return api.post(`/services/requests/${jobId}/update_status/`, { status });
+};
+
+export const logCashPayment = (jobId) => {
+    return api.post(`/payments/log_cash/${jobId}/`);
+};

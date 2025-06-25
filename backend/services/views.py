@@ -84,15 +84,16 @@ class AvailableRequestListView(APIView):
         except ProviderProfile.DoesNotExist:
             return Response({"error": "Provider profile not found."}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not provider_profile.is_verified:
+            return Response({"error": "Your account must be verified by an admin to see jobs."}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Now, check for availability and location *after* confirming they are verified
         if not provider_profile.is_available:
-            return Response({"message": "You are not marked as available for jobs."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "You are not marked as available."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # --- START OF THE FIX ---
-        
-        # Ensure that latitude and longitude from the profile are not None before proceeding
         if provider_profile.latitude is None or provider_profile.longitude is None:
-            return Response({"error": "Provider location is not set."}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"error": "Your location is not set."}, status=status.HTTP_400_BAD_REQUEST)
+        
         # Cast the Decimal objects from the database into standard floats for calculation
         user_lat = float(provider_profile.latitude)
         user_lon = float(provider_profile.longitude)

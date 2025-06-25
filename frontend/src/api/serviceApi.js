@@ -30,6 +30,11 @@ export const acceptServiceRequest = (requestId) => {
     return api.post(`/services/requests/${requestId}/accept/`);
 };
 
+export const declineJob = (requestId) => {
+    // We are calling the generic 'update_status' endpoint we created on the backend.
+    return api.post(`/services/requests/${requestId}/update_status/`, { status: 'DECLINED' });
+};
+
 // Fetches the provider's accepted jobs
 export const getProviderJobs = () => {
     // We'll assume for now this uses the same endpoint as customer,
